@@ -167,6 +167,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -247,7 +249,9 @@ class MainViewModel(application: Application) : ViewModel() {
         // Process the output logits-vector
         val outputBuffer = inputBuffer.floatArray
         val maxIndex = getMaxIndex(outputBuffer)
-        return "Predicted class: $maxIndex"
+        val maxPscore = outputBuffer[maxIndex]
+
+        return "\nPredicted class: $maxIndex \nClassification Score:  ${maxPscore}"
     }
 
     private fun getMaxIndex(outputBuffer: FloatArray): Int {
@@ -313,10 +317,11 @@ fun RequestContentPermission(mainViewModel: MainViewModel) {
 //            painter = painterResource(id = R.drawable.dog),
 //            contentDescription = null,
 //        )
+        Text(text = "NNAPI CNN Classifier", fontWeight = FontWeight.Normal, textAlign = TextAlign.Start, modifier = Modifier.padding(16.dp))
         Button(onClick = {
             launcher.launch("image/*")
         }) {
-            Text(text = "Select Input")
+            Text(text = "Select Input Image")
         }
 
         imageUri?.let { uri ->
@@ -326,13 +331,9 @@ fun RequestContentPermission(mainViewModel: MainViewModel) {
                 contentDescription = null,
                 modifier = Modifier.size(400.dp)
             )
+            Spacer(modifier = Modifier.padding(20.dp))
 
-            Button(onClick = {
-                mainViewModel.classifyImage(uri)
-            }) {
-                Text("Classify Image")
-            }
-
+            Text("Classified Class for Image out of 1001 Classes")
             val resultState by mainViewModel.classificationResult.collectAsState()
             resultState?.let { result ->
                 Text(text = "Classification Result: $result")
